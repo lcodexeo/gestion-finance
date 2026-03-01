@@ -334,22 +334,75 @@ document.getElementById("benefAchats").innerText = benefAchats+" €";
 document.getElementById("benefCommandes").innerText = benefCommandes+" €";
 document.getElementById("benefTotal").innerText = benefTotal+" €";
 
-updateChart(benefAchats,benefCommandes);
+updateChart();
 }
 
 /* ===== CHART ===== */
 
 let ctx=document.getElementById("chart").getContext("2d");
 let chart=new Chart(ctx,{
-type:"doughnut",
-data:{
-labels:["Achats","Commandes"],
-datasets:[{
-data:[0,0],
-backgroundColor:["#059669","#7c3aed"]
-}]
-}
+<script>
+
+/* ===== CHART LINE VERSION ===== */
+
+let ctx = document.getElementById("chart").getContext("2d");
+
+let chart = new Chart(ctx,{
+    type:"line",
+    data:{
+        labels:[],
+        datasets:[
+            {
+                label:"Achats",
+                data:[],
+                borderColor:"#2563eb",
+                backgroundColor:"transparent",
+                tension:0.3
+            },
+            {
+                label:"Commandes",
+                data:[],
+                borderColor:"#16a34a",
+                backgroundColor:"transparent",
+                tension:0.3
+            },
+            {
+                label:"Ventes",
+                data:[],
+                borderColor:"#dc2626",
+                backgroundColor:"transparent",
+                tension:0.3
+            }
+        ]
+    },
+    options:{
+        responsive:true,
+        plugins:{
+            legend:{
+                position:"top"
+            }
+        },
+        scales:{
+            y:{
+                beginAtZero:true
+            }
+        }
+    }
 });
+
+function updateChart(){
+
+    // Simulation simple basée sur quantité
+    chart.data.labels = ["Total"];
+
+    chart.data.datasets[0].data = [achats.length];
+    chart.data.datasets[1].data = [commandes.length];
+    chart.data.datasets[2].data = [0]; // ventes à venir
+
+    chart.update();
+}
+
+</script>
 
 function updateChart(a,c){
 chart.data.datasets[0].data=[a,c];
