@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Gestion Finance</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.dashboard {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.card {
+    padding: 15px;
+    border-radius: 12px;
+    width: 200px;
+    text-align: center;
+    font-size: 18px;
+}
+
+.revenus { background: #065f46; }
+.depenses { background: #7f1d1d; }
+.solde { background: #1e3a8a; }
+
+button {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+input, select {
+    padding: 6px;
+    margin: 4px;
+    border-radius: 6px;
+    border: none;
+}
+
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #334155;
+    padding: 6px;
+    text-align: center;
+}
+
+th {
+    background: #1e293b;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Gestion Financière</h1>
+
+<div class="dashboard">
+    <div class="card revenus">Revenus<br><span id="revenus">0 €</span></div>
+    <div class="card depenses">Dépenses<br><span id="depenses">0 €</span></div>
+    <div class="card solde">Solde<br><span id="solde">0 €</span></div>
+</div>
+
+<div>
+    <input type="date" id="date">
+    <input type="text" id="description" placeholder="Description">
+    <select id="type">
+        <option value="revenu">Revenu</option>
+        <option value="depense">Dépense</option>
+    </select>
+    <input type="number" id="montant" placeholder="Montant">
+    <button onclick="ajouter()">Ajouter</button>
+</div>
+
+<canvas id="graphique"></canvas>
+
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Description</th>
+<th>Type</th>
+<th>Montant</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+
+<script>
+let operations = JSON.parse(localStorage.getItem("operations")) || [];
+
+function sauvegarder() {
+    localStorage.setItem("operations", JSON.stringify(operations));
+}
+
+function ajouter() {
+    let date = document.getElementById("date").value;
+    let description = document.getElementById("description").value;
+    let type = document.getElementById("type").value;
+    let montant = parseFloat(document.getElementById("montant").value);
+
+    if (!montant) return;
+
+    operations.push({date, description, type, montant});
+    sauvegarder();
+    afficher();
+}
+
+function afficher() {
+    let tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+
+    let revenus = 0;
+    let depenses = 0;
+
+    operations.forEach(op => {
+        if(op.type === "revenu") revenus += op.montant;
+        else depenses += op.montant;
+
+        tbody.innerHTML += `
+        <tr>
+            <td>${op.date}</td>
+            <td>${op.description}</td>
+            <td>${op.type}</td>
+            <td>${op.montant} €</td>
+        </tr>
+        `;
+    });
+
+    document.getElementById("revenus").innerText = revenus.toFixed(2) + " €";
+    document.getElementById("depenses").innerText = depenses.toFixed(2) + " €";
+    document.getElementById("solde").innerText = (revenus - depenses).toFixed(2) + " €";
+
+    mettreAJourGraphique(revenus, depenses);
+}
+
+let ctx = document.getElementById("graphique").getContext("2d");
+let chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+        labels: ["Revenus", "Dépenses"],
+        datasets: [{
+            data: [0,0],
+            backgroundColor: ["#10b981", "#ef4444"]
+        }]
+    }
+});
+
+function mettreAJourGraphique(revenus, depenses) {
+    chart.data.datasets[0].data = [revenus, depenses];
+    chart.update();
+}
+
+afficher();
+</script>
+
+</body>
+</html>
