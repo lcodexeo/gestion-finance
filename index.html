@@ -3,13 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>Gestion Léo</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body{
     font-family:'Segoe UI',sans-serif;
     background:#f5f7fb;
-    color:#1e293b;
     margin:0;
     padding:30px;
 }
@@ -19,63 +17,19 @@ body{
     margin:auto;
 }
 
-h1{
-    text-align:center;
-}
+h1{text-align:center;}
 
-.dashboard{
-    display:flex;
-    gap:20px;
-    justify-content:center;
-    margin:30px 0;
-}
-
-.card{
-    padding:20px;
-    border-radius:16px;
-    width:240px;
-    text-align:center;
-    font-weight:600;
-    box-shadow:0 4px 15px rgba(0,0,0,0.08);
-}
-
-.revenus{background:#e6f7f0;color:#059669;}
-.depenses{background:#fde8e8;color:#dc2626;}
-.solde{background:#e0ecff;color:#2563eb;}
-
-.addBtn{
+button{
     background:#2563eb;
     color:white;
-    padding:12px 18px;
     border:none;
+    padding:12px 18px;
     border-radius:12px;
     cursor:pointer;
     font-weight:600;
 }
 
-.addBtn:hover{
-    background:#1d4ed8;
-}
-
-table{
-    width:100%;
-    margin-top:30px;
-    border-collapse:collapse;
-    background:white;
-    border-radius:16px;
-    overflow:hidden;
-    box-shadow:0 4px 15px rgba(0,0,0,0.08);
-}
-
-th{
-    background:#f1f5f9;
-    padding:12px;
-}
-
-td{
-    padding:12px;
-    border-top:1px solid #e2e8f0;
-}
+button:hover{background:#1d4ed8;}
 
 .modal{
     display:none;
@@ -88,35 +42,24 @@ td{
 
 .modal-content{
     background:white;
+    width:600px;
     padding:30px;
     border-radius:20px;
-    width:400px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.2);
 }
 
 input,select{
     width:100%;
     padding:10px;
+    margin-bottom:10px;
     border-radius:10px;
     border:1px solid #d1d5db;
+}
+
+.article-box{
+    border:1px solid #e5e7eb;
+    padding:15px;
+    border-radius:15px;
     margin-bottom:15px;
-}
-
-.saveBtn{
-    width:100%;
-    background:#2563eb;
-    color:white;
-    padding:12px;
-    border:none;
-    border-radius:12px;
-    font-weight:600;
-    cursor:pointer;
-}
-
-.close{
-    text-align:right;
-    cursor:pointer;
-    font-weight:bold;
 }
 </style>
 </head>
@@ -126,137 +69,105 @@ input,select{
 
 <h1>Gestion Léo</h1>
 
-<div class="dashboard">
-    <div class="card revenus">Revenus<br><span id="revenus">0 €</span></div>
-    <div class="card depenses">Dépenses<br><span id="depenses">0 €</span></div>
-    <div class="card solde">Bénéfice<br><span id="solde">0 €</span></div>
-</div>
-
-<button class="addBtn" onclick="ouvrirModal()">+ Achat</button>
-
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>Date</th>
-<th>Marque</th>
-<th>Produit</th>
-<th>Achat</th>
-<th>Revente</th>
-<th>Marge</th>
-<th>Stock</th>
-<th>Actions</th>
-</tr>
-</thead>
-<tbody id="tableBody"></tbody>
-</table>
+<button onclick="ouvrirModal()">+ Commande</button>
 
 </div>
 
+<!-- MODAL -->
 <div class="modal" id="modal">
 <div class="modal-content">
-<div class="close" onclick="fermerModal()">✕</div>
 
-<h2>Nouvelle opération</h2>
+<h2>Nouvelle commande</h2>
 
+<label>Date</label>
 <input type="date" id="date">
-<select id="categorie">
-<option value="moi">Pour moi</option>
-<option value="revendre">Pour revendre</option>
-</select>
-<input type="text" id="marque" placeholder="Marque">
-<input type="text" id="description" placeholder="Produit">
-<input type="number" id="achat" placeholder="Prix achat">
-<input type="number" id="revente" placeholder="Prix revente">
-<input type="number" id="livraison" placeholder="Frais livraison">
 
-<button class="saveBtn" onclick="ajouter()">Enregistrer</button>
+<label>Frais de livraison (€)</label>
+<input type="number" id="fraisLivraison" value="0">
+
+<h3>Articles</h3>
+
+<div id="articlesContainer"></div>
+
+<button onclick="ajouterArticle()">+ Ajouter un article</button>
+<br><br>
+<button onclick="enregistrerCommande()">Enregistrer la commande</button>
+
 </div>
 </div>
 
 <script>
-let produits = JSON.parse(localStorage.getItem("produits")) || [];
-let compteurID = localStorage.getItem("compteurID") || 1;
 
-function sauvegarder(){
-localStorage.setItem("produits",JSON.stringify(produits));
-localStorage.setItem("compteurID",compteurID);
-}
+let commandes = JSON.parse(localStorage.getItem("commandes")) || [];
 
 function ouvrirModal(){
 document.getElementById("modal").style.display="flex";
+document.getElementById("articlesContainer").innerHTML="";
+ajouterArticle();
 }
 
-function fermerModal(){
+function ajouterArticle(){
+
+let container=document.getElementById("articlesContainer");
+
+let index=container.children.length;
+
+let div=document.createElement("div");
+div.className="article-box";
+
+div.innerHTML=`
+<select class="categorie">
+<option value="moi">Pour moi</option>
+<option value="revendre">Pour revendre</option>
+</select>
+
+<input type="text" class="marque" placeholder="Marque">
+
+<input type="text" class="description" placeholder="Description">
+
+<input type="number" class="achat" placeholder="Prix achat">
+
+<input type="number" class="revente" placeholder="Prix revente">
+`;
+
+container.appendChild(div);
+}
+
+function enregistrerCommande(){
+
+let date=document.getElementById("date").value;
+let fraisLivraison=parseFloat(document.getElementById("fraisLivraison").value)||0;
+
+let articlesDiv=document.querySelectorAll(".article-box");
+
+let articles=[];
+
+articlesDiv.forEach(div=>{
+articles.push({
+categorie:div.querySelector(".categorie").value,
+marque:div.querySelector(".marque").value,
+description:div.querySelector(".description").value,
+achat:parseFloat(div.querySelector(".achat").value)||0,
+revente:parseFloat(div.querySelector(".revente").value)||0
+});
+});
+
+let fraisParArticle = fraisLivraison / articles.length;
+
+articles.forEach(a=>{
+a.achatTotal = a.achat + fraisParArticle;
+a.marge = a.revente - a.achatTotal;
+});
+
+commandes.push({date,fraisLivraison,articles});
+
+localStorage.setItem("commandes",JSON.stringify(commandes));
+
+alert("Commande enregistrée ✅");
+
 document.getElementById("modal").style.display="none";
 }
 
-function ajouter(){
-let date=document.getElementById("date").value;
-let categorie=document.getElementById("categorie").value;
-let marque=document.getElementById("marque").value;
-let description=document.getElementById("description").value;
-let achat=parseFloat(document.getElementById("achat").value)||0;
-let revente=parseFloat(document.getElementById("revente").value)||0;
-let livraison=parseFloat(document.getElementById("livraison").value)||0;
-
-let marge=0;
-let stock="-";
-
-if(categorie==="revendre"){
-marge=revente-(achat+livraison);
-stock="En stock";
-}
-
-produits.push({id:compteurID,date,marque,description,achat,revente,marge,stock});
-compteurID++;
-sauvegarder();
-afficher();
-fermerModal();
-}
-
-function afficher(){
-let tbody=document.getElementById("tableBody");
-tbody.innerHTML="";
-let revenus=0;
-let depenses=0;
-
-produits.forEach((p,index)=>{
-depenses+=p.achat;
-if(p.stock==="Vendu"){revenus+=p.revente;}
-
-tbody.innerHTML+=`
-<tr>
-<td>${p.id}</td>
-<td>${p.date}</td>
-<td>${p.marque}</td>
-<td>${p.description}</td>
-<td>${p.achat}€</td>
-<td>${p.revente||"-"}€</td>
-<td>${p.marge.toFixed(2)}€</td>
-<td><button onclick="toggleStock(${index})">${p.stock}</button></td>
-<td><button onclick="supprimer(${index})">🗑</button></td>
-</tr>`;
-});
-
-document.getElementById("revenus").innerText=revenus.toFixed(2)+" €";
-document.getElementById("depenses").innerText=depenses.toFixed(2)+" €";
-document.getElementById("solde").innerText=(revenus-depenses).toFixed(2)+" €";
-}
-
-function supprimer(index){
-produits.splice(index,1);
-sauvegarder();
-afficher();
-}
-
-function toggleStock(index){
-produits[index].stock = produits[index].stock==="En stock" ? "Vendu" : "En stock";
-sauvegarder();
-afficher();
-}
-
-afficher();
 </script>
 
 </body>
