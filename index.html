@@ -7,9 +7,10 @@
 
 <style>
 body{
-    font-family: 'Segoe UI', sans-serif;
+    font-family:'Segoe UI',sans-serif;
     background:#f5f7fb;
     color:#1e293b;
+    margin:0;
     padding:30px;
 }
 
@@ -20,14 +21,13 @@ body{
 
 h1{
     text-align:center;
-    margin-bottom:30px;
 }
 
 .dashboard{
     display:flex;
     gap:20px;
     justify-content:center;
-    margin:20px 0 30px 0;
+    margin:30px 0;
 }
 
 .card{
@@ -35,85 +35,32 @@ h1{
     border-radius:16px;
     width:240px;
     text-align:center;
-    font-size:18px;
     font-weight:600;
     box-shadow:0 4px 15px rgba(0,0,0,0.08);
 }
 
-.card span{
-    font-size:20px;
-    display:block;
-    margin-top:5px;
-}
+.revenus{background:#e6f7f0;color:#059669;}
+.depenses{background:#fde8e8;color:#dc2626;}
+.solde{background:#e0ecff;color:#2563eb;}
 
-.revenus{
-    background:#e6f7f0;
-    color:#059669;
-}
-
-.depenses{
-    background:#fde8e8;
-    color:#dc2626;
-}
-
-.solde{
-    background:#e0ecff;
-    color:#2563eb;
-}
-
-h3{
-    margin-top:40px;
-    margin-bottom:10px;
-}
-
-input,select{
-    padding:10px;
-    border-radius:10px;
-    border:1px solid #d1d5db;
-    margin:5px;
-    background:white;
-    min-width:140px;
-}
-
-button{
-    padding:10px 14px;
+.addBtn{
+    background:#2563eb;
+    color:white;
+    padding:12px 18px;
     border:none;
-    border-radius:10px;
+    border-radius:12px;
     cursor:pointer;
     font-weight:600;
 }
 
-.ajout{
-    background:#2563eb;
-    color:white;
-}
-
-.ajout:hover{
+.addBtn:hover{
     background:#1d4ed8;
-}
-
-.supprimer{
-    background:#fee2e2;
-    color:#dc2626;
-}
-
-.modifier{
-    background:#fef3c7;
-    color:#d97706;
-}
-
-canvas{
-    margin-top:30px;
-    background:white;
-    padding:20px;
-    border-radius:16px;
-    box-shadow:0 4px 15px rgba(0,0,0,0.05);
 }
 
 table{
     width:100%;
-    border-collapse:collapse;
     margin-top:30px;
+    border-collapse:collapse;
     background:white;
     border-radius:16px;
     overflow:hidden;
@@ -129,32 +76,69 @@ td{
     padding:12px;
     border-top:1px solid #e2e8f0;
 }
-    
-</div>
+
+/* ===== MODAL ===== */
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.4);
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-content{
+    background:white;
+    padding:30px;
+    border-radius:20px;
+    width:400px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-content h2{
+    margin-top:0;
+}
+
+input,select{
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #d1d5db;
+    margin-bottom:15px;
+}
+
+.saveBtn{
+    width:100%;
+    background:#2563eb;
+    color:white;
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.close{
+    text-align:right;
+    cursor:pointer;
+    font-weight:bold;
+}
+</style>
+</head>
+
 <body>
 <div class="container">
+
 <h1>Gestion Revente Pro</h1>
 
 <div class="dashboard">
-<div class="card revenus">Revenus<br><span id="revenus">0 €</span></div>
-<div class="card depenses">Dépenses<br><span id="depenses">0 €</span></div>
-<div class="card solde">Bénéfice<br><span id="solde">0 €</span></div>
+    <div class="card revenus">Revenus<br><span id="revenus">0 €</span></div>
+    <div class="card depenses">Dépenses<br><span id="depenses">0 €</span></div>
+    <div class="card solde">Bénéfice<br><span id="solde">0 €</span></div>
 </div>
 
-<h3>Ajouter produit</h3>
-
-<input type="date" id="date">
-<input type="text" id="description" placeholder="Produit">
-<select id="categorie">
-<option value="moi">Pour moi</option>
-<option value="revendre">Pour revendre</option>
-</select>
-<input type="number" id="achat" placeholder="Prix achat">
-<input type="number" id="revente" placeholder="Prix revente (si revendre)">
-<input type="number" id="livraison" placeholder="Frais livraison">
-<button class="ajout" onclick="ajouter()">Ajouter</button>
-
-<canvas id="graphique"></canvas>
+<button class="addBtn" onclick="ouvrirModal()">+ Ajouter</button>
 
 <table>
 <thead>
@@ -162,7 +146,6 @@ td{
 <th>ID</th>
 <th>Date</th>
 <th>Produit</th>
-<th>Catégorie</th>
 <th>Achat</th>
 <th>Revente</th>
 <th>Marge</th>
@@ -173,6 +156,31 @@ td{
 <tbody id="tableBody"></tbody>
 </table>
 
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+<div class="modal-content">
+
+<div class="close" onclick="fermerModal()">✕</div>
+
+<h2>Nouvelle opération</h2>
+
+<input type="date" id="date">
+<select id="categorie">
+<option value="moi">Pour moi</option>
+<option value="revendre">Pour revendre</option>
+</select>
+<input type="text" id="description" placeholder="Produit">
+<input type="number" id="achat" placeholder="Prix achat">
+<input type="number" id="revente" placeholder="Prix revente">
+<input type="number" id="livraison" placeholder="Frais livraison">
+
+<button class="saveBtn" onclick="ajouter()">Enregistrer</button>
+
+</div>
+</div>
+
 <script>
 
 let produits = JSON.parse(localStorage.getItem("produits")) || [];
@@ -181,6 +189,14 @@ let compteurID = localStorage.getItem("compteurID") || 1;
 function sauvegarder(){
 localStorage.setItem("produits",JSON.stringify(produits));
 localStorage.setItem("compteurID",compteurID);
+}
+
+function ouvrirModal(){
+document.getElementById("modal").style.display="flex";
+}
+
+function fermerModal(){
+document.getElementById("modal").style.display="none";
 }
 
 function ajouter(){
@@ -193,7 +209,7 @@ let revente=parseFloat(document.getElementById("revente").value)||0;
 let livraison=parseFloat(document.getElementById("livraison").value)||0;
 
 let marge=0;
-let stock="—";
+let stock="-";
 
 if(categorie==="revendre"){
 marge=revente-(achat+livraison);
@@ -204,10 +220,8 @@ produits.push({
 id:compteurID,
 date,
 description,
-categorie,
 achat,
 revente,
-livraison,
 marge,
 stock
 });
@@ -215,21 +229,19 @@ stock
 compteurID++;
 sauvegarder();
 afficher();
+fermerModal();
 }
 
 function afficher(){
-
 let tbody=document.getElementById("tableBody");
 tbody.innerHTML="";
-
 let revenus=0;
 let depenses=0;
 
 produits.forEach((p,index)=>{
+depenses+=p.achat;
 
-depenses+=p.achat+p.livraison;
-
-if(p.categorie==="revendre" && p.stock==="Vendu"){
+if(p.stock==="Vendu"){
 revenus+=p.revente;
 }
 
@@ -238,18 +250,11 @@ tbody.innerHTML+=`
 <td>${p.id}</td>
 <td>${p.date}</td>
 <td>${p.description}</td>
-<td>${p.categorie}</td>
 <td>${p.achat}€</td>
 <td>${p.revente||"-"}€</td>
 <td>${p.marge.toFixed(2)}€</td>
-<td>
-${p.categorie==="revendre"?
-`<button onclick="toggleStock(${index})">${p.stock}</button>`:"-"}
-</td>
-<td>
-<button class="modifier" onclick="modifier(${index})">✏</button>
-<button class="supprimer" onclick="supprimer(${index})">🗑</button>
-</td>
+<td><button onclick="toggleStock(${index})">${p.stock}</button></td>
+<td><button onclick="supprimer(${index})">🗑</button></td>
 </tr>
 `;
 });
@@ -257,8 +262,6 @@ ${p.categorie==="revendre"?
 document.getElementById("revenus").innerText=revenus.toFixed(2)+" €";
 document.getElementById("depenses").innerText=depenses.toFixed(2)+" €";
 document.getElementById("solde").innerText=(revenus-depenses).toFixed(2)+" €";
-
-mettreAJourGraphique(revenus,depenses);
 }
 
 function supprimer(index){
@@ -267,42 +270,10 @@ sauvegarder();
 afficher();
 }
 
-function modifier(index){
-let p=produits[index];
-document.getElementById("date").value=p.date;
-document.getElementById("description").value=p.description;
-document.getElementById("categorie").value=p.categorie;
-document.getElementById("achat").value=p.achat;
-document.getElementById("revente").value=p.revente;
-document.getElementById("livraison").value=p.livraison;
-produits.splice(index,1);
-}
-
 function toggleStock(index){
-if(produits[index].stock==="En stock")
-produits[index].stock="Vendu";
-else
-produits[index].stock="En stock";
-
+produits[index].stock = produits[index].stock==="En stock" ? "Vendu" : "En stock";
 sauvegarder();
 afficher();
-}
-
-let ctx=document.getElementById("graphique").getContext("2d");
-let chart=new Chart(ctx,{
-type:"doughnut",data:{
-labels:["Revenus","Dépenses"],
-datasets:[{
-label:"Montants",
-data:[0,0],
-backgroundColor:["#10b981","#ef4444"]
-}]
-}
-});
-
-function mettreAJourGraphique(r,d){
-chart.data.datasets[0].data=[r,d];
-chart.update();
 }
 
 afficher();
