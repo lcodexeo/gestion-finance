@@ -7,61 +7,104 @@
 
 <style>
 body{
-    font-family:Arial;
-    background:#0f172a;
-    color:white;
-    padding:20px;
+    font-family: 'Segoe UI', sans-serif;
+    background:#f5f7fb;
+    color:#1e293b;
+    padding:30px;
 }
 
-h1{text-align:center;}
+h1{
+    text-align:center;
+    margin-bottom:30px;
+}
 
 .dashboard{
     display:flex;
     gap:20px;
     justify-content:center;
-    margin-bottom:20px;
+    margin-bottom:30px;
 }
 
 .card{
-    padding:15px;
-    border-radius:12px;
-    width:220px;
+    padding:20px;
+    border-radius:16px;
+    width:240px;
     text-align:center;
+    font-size:18px;
+    font-weight:600;
+    box-shadow:0 4px 15px rgba(0,0,0,0.08);
 }
 
-.revenus{background:#065f46;}
-.depenses{background:#7f1d1d;}
-.solde{background:#1e3a8a;}
+.revenus{
+    background:#e6f7f0;
+    color:#059669;
+}
+
+.depenses{
+    background:#fde8e8;
+    color:#dc2626;
+}
+
+.solde{
+    background:#e0ecff;
+    color:#2563eb;
+}
 
 input,select{
-    padding:6px;
-    border-radius:6px;
-    border:none;
-    margin:4px;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #d1d5db;
+    margin:5px;
+    background:white;
+    min-width:150px;
 }
 
 button{
-    padding:6px 10px;
+    padding:10px 14px;
     border:none;
-    border-radius:6px;
+    border-radius:10px;
     cursor:pointer;
-    margin:2px;
+    font-weight:600;
 }
 
-.ajout{background:#2563eb;color:white;}
-.supprimer{background:#dc2626;color:white;}
-.modifier{background:#f59e0b;color:black;}
+.ajout{
+    background:#2563eb;
+    color:white;
+}
+
+.ajout:hover{
+    background:#1d4ed8;
+}
+
+.supprimer{
+    background:#fee2e2;
+    color:#dc2626;
+}
+
+.modifier{
+    background:#fef3c7;
+    color:#d97706;
+}
 
 table{
     width:100%;
     border-collapse:collapse;
-    margin-top:20px;
+    margin-top:30px;
+    background:white;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 4px 15px rgba(0,0,0,0.08);
 }
 
-th,td{
-    border:1px solid #334155;
-    padding:6px;
-    text-align:center;
+th{
+    background:#f1f5f9;
+    padding:12px;
+}
+
+td{
+    padding:12px;
+    border-top:1px solid #e2e8f0;
+}
 }
 
 th{background:#1e293b;}
