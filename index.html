@@ -77,8 +77,6 @@ td{
     border-top:1px solid #e2e8f0;
 }
 
-/* ===== MODAL ===== */
-
 .modal{
     display:none;
     position:fixed;
@@ -94,10 +92,6 @@ td{
     border-radius:20px;
     width:400px;
     box-shadow:0 10px 30px rgba(0,0,0,0.2);
-}
-
-.modal-content h2{
-    margin-top:0;
 }
 
 input,select{
@@ -130,7 +124,7 @@ input,select{
 <body>
 <div class="container">
 
-<h1>Gestion Revente Pro</h1>
+<h1>Gestion Léo</h1>
 
 <div class="dashboard">
     <div class="card revenus">Revenus<br><span id="revenus">0 €</span></div>
@@ -138,7 +132,6 @@ input,select{
     <div class="card solde">Bénéfice<br><span id="solde">0 €</span></div>
 </div>
 
-<!-- 🔥 Bouton modifié -->
 <button class="addBtn" onclick="ouvrirModal()">+ Achat</button>
 
 <table>
@@ -160,39 +153,28 @@ input,select{
 
 </div>
 
-<!-- MODAL -->
 <div class="modal" id="modal">
 <div class="modal-content">
-
 <div class="close" onclick="fermerModal()">✕</div>
 
 <h2>Nouvelle opération</h2>
 
 <input type="date" id="date">
-
 <select id="categorie">
 <option value="moi">Pour moi</option>
 <option value="revendre">Pour revendre</option>
 </select>
-
-<!-- 🔥 Nouveau champ MARQUE -->
-<input type="text" id="marque" placeholder="Marque (ex: Nike, Apple...)">
-
+<input type="text" id="marque" placeholder="Marque">
 <input type="text" id="description" placeholder="Produit">
-
 <input type="number" id="achat" placeholder="Prix achat">
-
 <input type="number" id="revente" placeholder="Prix revente">
-
 <input type="number" id="livraison" placeholder="Frais livraison">
 
 <button class="saveBtn" onclick="ajouter()">Enregistrer</button>
-
 </div>
 </div>
 
 <script>
-
 let produits = JSON.parse(localStorage.getItem("produits")) || [];
 let compteurID = localStorage.getItem("compteurID") || 1;
 
@@ -210,7 +192,6 @@ document.getElementById("modal").style.display="none";
 }
 
 function ajouter(){
-
 let date=document.getElementById("date").value;
 let categorie=document.getElementById("categorie").value;
 let marque=document.getElementById("marque").value;
@@ -227,17 +208,7 @@ marge=revente-(achat+livraison);
 stock="En stock";
 }
 
-produits.push({
-id:compteurID,
-date,
-marque,
-description,
-achat,
-revente,
-marge,
-stock
-});
-
+produits.push({id:compteurID,date,marque,description,achat,revente,marge,stock});
 compteurID++;
 sauvegarder();
 afficher();
@@ -252,10 +223,7 @@ let depenses=0;
 
 produits.forEach((p,index)=>{
 depenses+=p.achat;
-
-if(p.stock==="Vendu"){
-revenus+=p.revente;
-}
+if(p.stock==="Vendu"){revenus+=p.revente;}
 
 tbody.innerHTML+=`
 <tr>
@@ -268,8 +236,7 @@ tbody.innerHTML+=`
 <td>${p.marge.toFixed(2)}€</td>
 <td><button onclick="toggleStock(${index})">${p.stock}</button></td>
 <td><button onclick="supprimer(${index})">🗑</button></td>
-</tr>
-`;
+</tr>`;
 });
 
 document.getElementById("revenus").innerText=revenus.toFixed(2)+" €";
@@ -290,7 +257,6 @@ afficher();
 }
 
 afficher();
-
 </script>
 
 </body>
