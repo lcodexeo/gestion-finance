@@ -138,13 +138,15 @@ input,select{
     <div class="card solde">Bénéfice<br><span id="solde">0 €</span></div>
 </div>
 
-<button class="addBtn" onclick="ouvrirModal()">+ Ajouter</button>
+<!-- 🔥 Bouton modifié -->
+<button class="addBtn" onclick="ouvrirModal()">+ Achat</button>
 
 <table>
 <thead>
 <tr>
 <th>ID</th>
 <th>Date</th>
+<th>Marque</th>
 <th>Produit</th>
 <th>Achat</th>
 <th>Revente</th>
@@ -167,13 +169,21 @@ input,select{
 <h2>Nouvelle opération</h2>
 
 <input type="date" id="date">
+
 <select id="categorie">
 <option value="moi">Pour moi</option>
 <option value="revendre">Pour revendre</option>
 </select>
+
+<!-- 🔥 Nouveau champ MARQUE -->
+<input type="text" id="marque" placeholder="Marque (ex: Nike, Apple...)">
+
 <input type="text" id="description" placeholder="Produit">
+
 <input type="number" id="achat" placeholder="Prix achat">
+
 <input type="number" id="revente" placeholder="Prix revente">
+
 <input type="number" id="livraison" placeholder="Frais livraison">
 
 <button class="saveBtn" onclick="ajouter()">Enregistrer</button>
@@ -202,8 +212,9 @@ document.getElementById("modal").style.display="none";
 function ajouter(){
 
 let date=document.getElementById("date").value;
-let description=document.getElementById("description").value;
 let categorie=document.getElementById("categorie").value;
+let marque=document.getElementById("marque").value;
+let description=document.getElementById("description").value;
 let achat=parseFloat(document.getElementById("achat").value)||0;
 let revente=parseFloat(document.getElementById("revente").value)||0;
 let livraison=parseFloat(document.getElementById("livraison").value)||0;
@@ -219,6 +230,7 @@ stock="En stock";
 produits.push({
 id:compteurID,
 date,
+marque,
 description,
 achat,
 revente,
@@ -249,6 +261,7 @@ tbody.innerHTML+=`
 <tr>
 <td>${p.id}</td>
 <td>${p.date}</td>
+<td>${p.marque}</td>
 <td>${p.description}</td>
 <td>${p.achat}€</td>
 <td>${p.revente||"-"}€</td>
