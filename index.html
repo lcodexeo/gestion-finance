@@ -2,175 +2,248 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Gestion Finance</title>
+<title>Gestion Revente Pro</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #0f172a;
-    color: white;
-    padding: 20px;
+body{
+    font-family:Arial;
+    background:#0f172a;
+    color:white;
+    padding:20px;
 }
 
-h1 {
-    text-align: center;
+h1{text-align:center;}
+
+.dashboard{
+    display:flex;
+    gap:20px;
+    justify-content:center;
+    margin-bottom:20px;
 }
 
-.dashboard {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    margin-bottom: 20px;
+.card{
+    padding:15px;
+    border-radius:12px;
+    width:220px;
+    text-align:center;
 }
 
-.card {
-    padding: 15px;
-    border-radius: 12px;
-    width: 200px;
-    text-align: center;
-    font-size: 18px;
+.revenus{background:#065f46;}
+.depenses{background:#7f1d1d;}
+.solde{background:#1e3a8a;}
+
+input,select{
+    padding:6px;
+    border-radius:6px;
+    border:none;
+    margin:4px;
 }
 
-.revenus { background: #065f46; }
-.depenses { background: #7f1d1d; }
-.solde { background: #1e3a8a; }
-
-button {
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: none;
-    background: #2563eb;
-    color: white;
-    cursor: pointer;
-    margin-bottom: 10px;
+button{
+    padding:6px 10px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    margin:2px;
 }
 
-input, select {
-    padding: 6px;
-    margin: 4px;
-    border-radius: 6px;
-    border: none;
+.ajout{background:#2563eb;color:white;}
+.supprimer{background:#dc2626;color:white;}
+.modifier{background:#f59e0b;color:black;}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
 }
 
-table {
-    width: 100%;
-    margin-top: 20px;
-    border-collapse: collapse;
+th,td{
+    border:1px solid #334155;
+    padding:6px;
+    text-align:center;
 }
 
-th, td {
-    border: 1px solid #334155;
-    padding: 6px;
-    text-align: center;
-}
-
-th {
-    background: #1e293b;
-}
+th{background:#1e293b;}
 </style>
 </head>
 
 <body>
 
-<h1>Gestion Financière</h1>
+<h1>Gestion Revente Pro</h1>
 
 <div class="dashboard">
-    <div class="card revenus">Revenus<br><span id="revenus">0 €</span></div>
-    <div class="card depenses">Dépenses<br><span id="depenses">0 €</span></div>
-    <div class="card solde">Solde<br><span id="solde">0 €</span></div>
+<div class="card revenus">Revenus<br><span id="revenus">0 €</span></div>
+<div class="card depenses">Dépenses<br><span id="depenses">0 €</span></div>
+<div class="card solde">Bénéfice<br><span id="solde">0 €</span></div>
 </div>
 
-<div>
-    <input type="date" id="date">
-    <input type="text" id="description" placeholder="Description">
-    <select id="type">
-        <option value="revenu">Revenu</option>
-        <option value="depense">Dépense</option>
-    </select>
-    <input type="number" id="montant" placeholder="Montant">
-    <button onclick="ajouter()">Ajouter</button>
-</div>
+<h3>Ajouter produit</h3>
+
+<input type="date" id="date">
+<input type="text" id="description" placeholder="Produit">
+<select id="categorie">
+<option value="moi">Pour moi</option>
+<option value="revendre">Pour revendre</option>
+</select>
+<input type="number" id="achat" placeholder="Prix achat">
+<input type="number" id="revente" placeholder="Prix revente (si revendre)">
+<input type="number" id="livraison" placeholder="Frais livraison">
+<button class="ajout" onclick="ajouter()">Ajouter</button>
 
 <canvas id="graphique"></canvas>
 
 <table>
 <thead>
 <tr>
+<th>ID</th>
 <th>Date</th>
-<th>Description</th>
-<th>Type</th>
-<th>Montant</th>
+<th>Produit</th>
+<th>Catégorie</th>
+<th>Achat</th>
+<th>Revente</th>
+<th>Marge</th>
+<th>Stock</th>
+<th>Actions</th>
 </tr>
 </thead>
 <tbody id="tableBody"></tbody>
 </table>
 
 <script>
-let operations = JSON.parse(localStorage.getItem("operations")) || [];
 
-function sauvegarder() {
-    localStorage.setItem("operations", JSON.stringify(operations));
+let produits = JSON.parse(localStorage.getItem("produits")) || [];
+let compteurID = localStorage.getItem("compteurID") || 1;
+
+function sauvegarder(){
+localStorage.setItem("produits",JSON.stringify(produits));
+localStorage.setItem("compteurID",compteurID);
 }
 
-function ajouter() {
-    let date = document.getElementById("date").value;
-    let description = document.getElementById("description").value;
-    let type = document.getElementById("type").value;
-    let montant = parseFloat(document.getElementById("montant").value);
+function ajouter(){
 
-    if (!montant) return;
+let date=document.getElementById("date").value;
+let description=document.getElementById("description").value;
+let categorie=document.getElementById("categorie").value;
+let achat=parseFloat(document.getElementById("achat").value)||0;
+let revente=parseFloat(document.getElementById("revente").value)||0;
+let livraison=parseFloat(document.getElementById("livraison").value)||0;
 
-    operations.push({date, description, type, montant});
-    sauvegarder();
-    afficher();
+let marge=0;
+let stock="—";
+
+if(categorie==="revendre"){
+marge=revente-(achat+livraison);
+stock="En stock";
 }
 
-function afficher() {
-    let tbody = document.getElementById("tableBody");
-    tbody.innerHTML = "";
-
-    let revenus = 0;
-    let depenses = 0;
-
-    operations.forEach(op => {
-        if(op.type === "revenu") revenus += op.montant;
-        else depenses += op.montant;
-
-        tbody.innerHTML += `
-        <tr>
-            <td>${op.date}</td>
-            <td>${op.description}</td>
-            <td>${op.type}</td>
-            <td>${op.montant} €</td>
-        </tr>
-        `;
-    });
-
-    document.getElementById("revenus").innerText = revenus.toFixed(2) + " €";
-    document.getElementById("depenses").innerText = depenses.toFixed(2) + " €";
-    document.getElementById("solde").innerText = (revenus - depenses).toFixed(2) + " €";
-
-    mettreAJourGraphique(revenus, depenses);
-}
-
-let ctx = document.getElementById("graphique").getContext("2d");
-let chart = new Chart(ctx, {
-    type: "bar",
-    data: {
-        labels: ["Revenus", "Dépenses"],
-        datasets: [{
-            data: [0,0],
-            backgroundColor: ["#10b981", "#ef4444"]
-        }]
-    }
+produits.push({
+id:compteurID,
+date,
+description,
+categorie,
+achat,
+revente,
+livraison,
+marge,
+stock
 });
 
-function mettreAJourGraphique(revenus, depenses) {
-    chart.data.datasets[0].data = [revenus, depenses];
-    chart.update();
+compteurID++;
+sauvegarder();
+afficher();
+}
+
+function afficher(){
+
+let tbody=document.getElementById("tableBody");
+tbody.innerHTML="";
+
+let revenus=0;
+let depenses=0;
+
+produits.forEach((p,index)=>{
+
+depenses+=p.achat+p.livraison;
+
+if(p.categorie==="revendre" && p.stock==="Vendu"){
+revenus+=p.revente;
+}
+
+tbody.innerHTML+=`
+<tr>
+<td>${p.id}</td>
+<td>${p.date}</td>
+<td>${p.description}</td>
+<td>${p.categorie}</td>
+<td>${p.achat}€</td>
+<td>${p.revente||"-"}€</td>
+<td>${p.marge.toFixed(2)}€</td>
+<td>
+${p.categorie==="revendre"?
+`<button onclick="toggleStock(${index})">${p.stock}</button>`:"-"}
+</td>
+<td>
+<button class="modifier" onclick="modifier(${index})">✏</button>
+<button class="supprimer" onclick="supprimer(${index})">🗑</button>
+</td>
+</tr>
+`;
+});
+
+document.getElementById("revenus").innerText=revenus.toFixed(2)+" €";
+document.getElementById("depenses").innerText=depenses.toFixed(2)+" €";
+document.getElementById("solde").innerText=(revenus-depenses).toFixed(2)+" €";
+
+mettreAJourGraphique(revenus,depenses);
+}
+
+function supprimer(index){
+produits.splice(index,1);
+sauvegarder();
+afficher();
+}
+
+function modifier(index){
+let p=produits[index];
+document.getElementById("date").value=p.date;
+document.getElementById("description").value=p.description;
+document.getElementById("categorie").value=p.categorie;
+document.getElementById("achat").value=p.achat;
+document.getElementById("revente").value=p.revente;
+document.getElementById("livraison").value=p.livraison;
+produits.splice(index,1);
+}
+
+function toggleStock(index){
+if(produits[index].stock==="En stock")
+produits[index].stock="Vendu";
+else
+produits[index].stock="En stock";
+
+sauvegarder();
+afficher();
+}
+
+let ctx=document.getElementById("graphique").getContext("2d");
+let chart=new Chart(ctx,{
+type:"bar",
+data:{
+labels:["Revenus","Dépenses"],
+datasets:[{
+data:[0,0],
+backgroundColor:["#10b981","#ef4444"]
+}]
+}
+});
+
+function mettreAJourGraphique(r,d){
+chart.data.datasets[0].data=[r,d];
+chart.update();
 }
 
 afficher();
+
 </script>
 
 </body>
