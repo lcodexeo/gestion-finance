@@ -25,7 +25,6 @@ h1{
 }
 
 /* NAV */
-
 .nav{
     display:flex;
     justify-content:center;
@@ -49,7 +48,6 @@ h1{
 }
 
 /* CARDS */
-
 .cards{
     display:flex;
     gap:20px;
@@ -66,12 +64,6 @@ h1{
     box-shadow:0 5px 20px rgba(0,0,0,0.08);
 }
 
-.card h3{
-    margin:0;
-    font-size:16px;
-    color:#64748b;
-}
-
 .card span{
     font-size:24px;
     font-weight:700;
@@ -80,7 +72,6 @@ h1{
 }
 
 /* TABLE */
-
 table{
     width:100%;
     border-collapse:collapse;
@@ -102,7 +93,6 @@ td{
 }
 
 /* BUTTON */
-
 .primaryBtn{
     background:#2563eb;
     color:white;
@@ -113,13 +103,20 @@ td{
     margin-bottom:20px;
 }
 
-/* SECTIONS */
+.deleteBtn{
+    background:#dc2626;
+    color:white;
+    border:none;
+    padding:5px 10px;
+    border-radius:8px;
+    cursor:pointer;
+}
 
+/* SECTIONS */
 .section{ display:none; }
 .section.active{ display:block; }
 
 /* MODAL */
-
 .modal{
   display:none;
   position:fixed;
@@ -136,7 +133,7 @@ td{
   background:white;
   padding:30px;
   border-radius:16px;
-  width:350px;
+  width:400px;
   display:flex;
   flex-direction:column;
   gap:15px;
@@ -187,15 +184,12 @@ td{
 
 <!-- DASHBOARD -->
 <div id="dashboard" class="section active">
-
 <div class="cards">
-<div class="card"><h3>Total Achats</h3><span id="countAchats">0</span></div>
-<div class="card"><h3>Total Commandes</h3><span id="countCommandes">0</span></div>
-<div class="card"><h3>Total Ventes</h3><span id="countVentes">0</span></div>
+<div class="card"><span id="countAchats">0</span> Achats</div>
+<div class="card"><span id="countCommandes">0</span> Commandes</div>
+<div class="card"><span id="countVentes">0</span> Ventes</div>
 </div>
-
 <canvas id="chart"></canvas>
-
 </div>
 
 <!-- ACHATS -->
@@ -208,7 +202,8 @@ td{
 <th>Date</th>
 <th>Produit</th>
 <th>Achat</th>
-<th>Revente prévue</th>
+<th>Revente</th>
+<th></th>
 </tr>
 </thead>
 <tbody id="achatsTable"></tbody>
@@ -217,7 +212,7 @@ td{
 
 <!-- COMMANDES -->
 <div id="commandes" class="section">
-<button class="primaryBtn" onclick="alert('Commande à venir')">+ Commande</button>
+<button class="primaryBtn" onclick="openCommandeModal()">+ Commande</button>
 <table>
 <thead>
 <tr>
@@ -225,7 +220,8 @@ td{
 <th>Date</th>
 <th>Nb Articles</th>
 <th>Total Achat</th>
-<th>Frais Livraison</th>
+<th>Frais</th>
+<th></th>
 </tr>
 </thead>
 <tbody id="commandesTable"></tbody>
@@ -245,7 +241,7 @@ td{
 <h3>Nouvel Achat</h3>
 <input type="text" id="achatProduit" placeholder="Nom du produit">
 <input type="number" id="achatPrix" placeholder="Prix achat (€)">
-<input type="number" id="achatRevente" placeholder="Prix revente prévue (€)">
+<input type="number" id="achatRevente" placeholder="Prix revente (€)">
 <div class="modalButtons">
 <button onclick="closeAchatModal()" class="cancelBtn">Annuler</button>
 <button onclick="saveAchat()" class="saveBtn">Enregistrer</button>
@@ -253,16 +249,27 @@ td{
 </div>
 </div>
 
-<script>
+<!-- MODAL COMMANDE -->
+<div id="commandeModal" class="modal">
+<div class="modalContent">
+<h3>Nouvelle Commande</h3>
+<input type="number" id="nbArticles" placeholder="Nombre d'articles">
+<input type="number" id="totalCommande" placeholder="Total achat (€)">
+<input type="number" id="fraisCommande" placeholder="Frais livraison (€)">
+<div class="modalButtons">
+<button onclick="closeCommandeModal()" class="cancelBtn">Annuler</button>
+<button onclick="saveCommande()" class="saveBtn">Enregistrer</button>
+</div>
+</div>
+</div>
 
-/* STORAGE */
+<script>
 
 let achats = JSON.parse(localStorage.getItem("achats")) || [];
 let commandes = JSON.parse(localStorage.getItem("commandes")) || [];
 let compteurBL = localStorage.getItem("compteurBL") || 1;
 
 /* NAV */
-
 function switchTab(tab){
 document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
 document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
@@ -271,7 +278,6 @@ document.getElementById("tab-"+tab).classList.add("active");
 }
 
 /* BL */
-
 function generateBL(){
 let bl = "BL-" + String(compteurBL).padStart(4,"0");
 compteurBL++;
@@ -279,78 +285,87 @@ localStorage.setItem("compteurBL",compteurBL);
 return bl;
 }
 
-/* MODAL */
-
-function openAchatModal(){
-document.getElementById("achatModal").style.display="flex";
-}
-
-function closeAchatModal(){
-document.getElementById("achatModal").style.display="none";
-}
+/* ACHAT */
+function openAchatModal(){ document.getElementById("achatModal").style.display="flex"; }
+function closeAchatModal(){ document.getElementById("achatModal").style.display="none"; }
 
 function saveAchat(){
-
 let produit = document.getElementById("achatProduit").value;
-let prixAchat = parseFloat(document.getElementById("achatPrix").value) || 0;
-let prixRevente = parseFloat(document.getElementById("achatRevente").value) || 0;
-
+let prix = parseFloat(document.getElementById("achatPrix").value)||0;
+let revente = parseFloat(document.getElementById("achatRevente").value)||0;
 if(!produit) return;
 
-achats.push({
-bl:generateBL(),
-date:new Date().toISOString().split("T")[0],
-produit,
-prixAchat,
-prixRevente
-});
-
+achats.push({bl:generateBL(),date:new Date().toISOString().split("T")[0],produit,prix,revente});
 localStorage.setItem("achats",JSON.stringify(achats));
-
 closeAchatModal();
 render();
-
-document.getElementById("achatProduit").value="";
-document.getElementById("achatPrix").value="";
-document.getElementById("achatRevente").value="";
 }
 
+/* COMMANDE */
+function openCommandeModal(){ document.getElementById("commandeModal").style.display="flex"; }
+function closeCommandeModal(){ document.getElementById("commandeModal").style.display="none"; }
+
+function saveCommande(){
+let nb = parseInt(document.getElementById("nbArticles").value)||0;
+let total = parseFloat(document.getElementById("totalCommande").value)||0;
+let frais = parseFloat(document.getElementById("fraisCommande").value)||0;
+if(nb<=0) return;
+
+commandes.push({bl:generateBL(),date:new Date().toISOString().split("T")[0],nb,total,frais});
+localStorage.setItem("commandes",JSON.stringify(commandes));
+closeCommandeModal();
+render();
+}
+
+/* DELETE */
+function deleteAchat(i){ achats.splice(i,1); localStorage.setItem("achats",JSON.stringify(achats)); render();}
+function deleteCommande(i){ commandes.splice(i,1); localStorage.setItem("commandes",JSON.stringify(commandes)); render();}
+
 /* RENDER */
-
 function render(){
-
 document.getElementById("countAchats").innerText = achats.length;
 document.getElementById("countCommandes").innerText = commandes.length;
 document.getElementById("countVentes").innerText = 0;
 
-let achatsHTML="";
-achats.forEach(a=>{
-achatsHTML+=`
-<tr>
+let aHTML="";
+achats.forEach((a,i)=>{
+aHTML+=`<tr>
 <td>${a.bl}</td>
 <td>${a.date}</td>
 <td>${a.produit}</td>
-<td>${a.prixAchat}€</td>
-<td>${a.prixRevente}€</td>
+<td>${a.prix}€</td>
+<td>${a.revente}€</td>
+<td><button class="deleteBtn" onclick="deleteAchat(${i})">X</button></td>
 </tr>`;
 });
-document.getElementById("achatsTable").innerHTML=achatsHTML;
+document.getElementById("achatsTable").innerHTML=aHTML;
+
+let cHTML="";
+commandes.forEach((c,i)=>{
+cHTML+=`<tr>
+<td>${c.bl}</td>
+<td>${c.date}</td>
+<td>${c.nb}</td>
+<td>${c.total}€</td>
+<td>${c.frais}€</td>
+<td><button class="deleteBtn" onclick="deleteCommande(${i})">X</button></td>
+</tr>`;
+});
+document.getElementById("commandesTable").innerHTML=cHTML;
 
 updateChart();
 }
 
 /* CHART */
-
 let ctx = document.getElementById("chart").getContext("2d");
-
 let chart = new Chart(ctx,{
 type:"line",
 data:{
 labels:["Total"],
 datasets:[
-{label:"Achats",data:[0],borderColor:"#2563eb",tension:0.3},
-{label:"Commandes",data:[0],borderColor:"#16a34a",tension:0.3},
-{label:"Ventes",data:[0],borderColor:"#dc2626",tension:0.3}
+{label:"Achats",data:[0],borderColor:"#2563eb"},
+{label:"Commandes",data:[0],borderColor:"#16a34a"},
+{label:"Ventes",data:[0],borderColor:"#dc2626"}
 ]
 },
 options:{responsive:true}
